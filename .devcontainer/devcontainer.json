@@ -1,0 +1,27 @@
+{
+  "name": "PHP + Nginx + MySQL",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [8080, 3306],
+  "portsAttributes": {
+    "8080": {
+      "label": "Nginx",
+      "onAutoForward": "notify"
+    },
+    "3306": {
+      "label": "MySQL",
+      "onAutoForward": "silent"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "bmewburn.vscode-intelephense-client",
+        "xdebug.php-debug"
+      ]
+    }
+  },
+  "remoteUser": "root",
+  "postStartCommand": "chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true"
+}
