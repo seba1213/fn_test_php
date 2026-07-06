@@ -23,5 +23,5 @@
     }
   },
   "remoteUser": "root",
-  "postStartCommand": "chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true"
+  "postStartCommand": "chown -R www-data:www-data storage bootstrap/cache && chmod -R ug+rwx storage bootstrap/cache"
 }
