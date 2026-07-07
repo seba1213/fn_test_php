@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: app
+    image: shortlink-app:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DOCKER_MYSQL_DATABASE:-app}
+      DB_USERNAME: ${DOCKER_MYSQL_USER:-app}
+      DB_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?DOCKER_MYSQL_PASSWORD is required}
+    volumes:
+      - app-storage:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: nginx
+    image: shortlink-nginx:latest
+    restart: unless-stopped
+    ports:
+      - "${DOCKER_HTTP_PORT:-80}:80"
+    depends_on:
+      - app
+    networks:
+      - appnet
+
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DOCKER_MYSQL_ROOT_PASSWORD:?DOCKER_MYSQL_ROOT_PASSWORD is required}
+      MYSQL_DATABASE: ${DOCKER_MYSQL_DATABASE:-app}
+      MYSQL_USER: ${DOCKER_MYSQL_USER:-app}
+      MYSQL_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?DOCKER_MYSQL_PASSWORD is required}
+    volumes:
+      - ${DOCKER_MYSQL_DATA_PATH:-../../mysql-data}:/var/lib/mysql
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DOCKER_MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  app-storage:
+
+networks:
+  appnet:

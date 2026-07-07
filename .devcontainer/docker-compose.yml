@@ -7,7 +7,6 @@ services:
       - ./.env
     volumes:
       - ..:/workspace:cached
-      - ./.env:/workspace/.env:ro
     networks:
       - devnet
     depends_on:
