@@ -12,8 +12,6 @@ use Illuminate\Support\Str;
 #[Fillable(['user_id', 'code', 'original_url'])]
 class ShortLink extends Model
 {
-    private const BASE62_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -26,30 +24,16 @@ class ShortLink extends Model
 
     public static function generateCode(int $id): string
     {
-        return self::base62Encode($id + 10000);
+        return self::base36Encode($id + 10000);
     }
 
-    private static function base62Encode(int $number): string
+    private static function base36Encode(int $number): string
     {
         if ($number < 0) {
             throw new \InvalidArgumentException('Number must be non-negative.');
         }
 
-        if ($number === 0) {
-            return '0';
-        }
-
-        $alphabet = self::BASE62_ALPHABET;
-        $base = 62;
-        $encoded = '';
-
-        while ($number > 0) {
-            $remainder = $number % $base;
-            $encoded = $alphabet[$remainder] . $encoded;
-            $number = intdiv($number, $base);
-        }
-
-        return $encoded;
+        return base_convert((string) $number, 10, 36);
     }
 
     public static function createForUser(int $userId, string $originalUrl): self
