@@ -8,12 +8,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/{code}', ShortLinkRedirectController::class)
-    ->where('code', '(?!admin$)[^/]+')
-    ->name('short-links.redirect');
-
 Route::view('/link-missing', 'link-missing')
     ->name('short-links.missing');
+
+Route::get('/{code}', ShortLinkRedirectController::class)
+    ->where('code', '(?!(admin|api|link-missing)$)[^/]+')
+    ->name('short-links.redirect');
 
 Route::middleware('auth')
     ->prefix('api')

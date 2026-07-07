@@ -3,8 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - ./.env
     volumes:
       - ..:/workspace:cached
+      - ./.env:/workspace/.env:ro
     networks:
       - devnet
     depends_on:
